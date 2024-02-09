@@ -5,10 +5,12 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -18,19 +20,18 @@ import javax.swing.JTextField;
  * <h1> Window </h1>
  * <p> Run the window of the terminal </p>
  * @throws Exception
- * @author David
+ * @author D4vsus
  */
-public abstract class Window extends JFrame implements ActionListener{
+
+public abstract class Window extends JFrame implements ActionListener,KeyListener{
 	
 	//Variables and objects
 	private static final long serialVersionUID = 1L;
-	private JMenuBar MenuBar;
-	private JMenu[] MenuBottons;
-	private JPanel InputPanel;
-	private JTextArea Output;
-	private JTextField InputTextFile;
-	private JButton BottonEnter;
-	private JScrollPane ScrollPane;
+	private JPanel inputPanel;
+	private JTextArea outputArea;
+	private JTextField inputTextFile;
+	private JButton bottonEnter;
+	private JScrollPane scrollPane;
 	
 	//Methods
 	
@@ -41,74 +42,66 @@ public abstract class Window extends JFrame implements ActionListener{
 	 * @param wide : integer
 	 * @param height : integer
 	 * @param terminal : Terminal
-	 * @author David
+	 * @author D4vsus
 	 */
 	
-	public Window(String title,int wide,int height){
+	public Window(String title){
 		//prepare main window
 		this.setTitle(title);
+		ImageIcon icon = new ImageIcon("resources\\GDrag.png");
+		this.setIconImage(icon.getImage());
 	    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    this.setSize(wide,height);
-	    this.setLocationRelativeTo(null);
 	      
-	    add_menu_bar(2);
+	    //add_menu_bar(2);
 	    add_input_panel();
 	    add_output_panel();
-	    setFontOfTheWindow("Serif",22);
+	    setFontOfTheWindow(Font.MONOSPACED,18);
+	    //the fast green
+	    //this.setColorOfInput(0x00665E, 0x00665E, 0x00665E);
+	    //this.setColorOfFont(0xFFFFFF);
+	    //this.setColorOfOutput(0x00665E, 0x00665E);
+	    //this.setColorOfMenu(0xCEDC00,0x000000);
+	    //the Golden Dragon
+	    this.setColorOfInput(0xffdf00, 0xffff55, 0xffff55);
+	    this.setColorOfFont(0x000000);
+	    this.setColorOfOutput(0xffc600, 0xffc600);
 	     //start window
 	    
-	    this.setColorOfInput(0x00665E, 0x00665E, 0x00665E);
-	    this.setColorOfFont(0xFFFFFF);
-	    this.setColorOfOutput(0x00665E, 0x00665E);
-	    this.setColorOfMenu(0xCEDC00,0x000000);
+	    this.pack();
+	    this.setLocationRelativeTo(null);
 	    this.setVisible(true);
-	}
-	
-	/**
-	 * <h1> Window.add_menu_bar() </h1>
-	 * <p> Add the menu bar to the window</p>
-	 * @param number_of_bottons : integer
-	 * @author David
-	 */
-	
-	private void add_menu_bar(int number_of_bottons) {
-		this.MenuBar = new JMenuBar();
-	   	this.MenuBottons = new JMenu[number_of_bottons];
-	    this.MenuBottons[0] = new JMenu("Options");
-	    this.MenuBottons[1] = new JMenu("Help");
-	    this.MenuBar.add(this.MenuBottons[0]);
-	    this.MenuBar.add(this.MenuBottons[1] );
-	    this.getContentPane().add(BorderLayout.NORTH,MenuBar);
 	}
 	
 	/**
 	 * <h1> Window.add_input_panel() </h1>
 	 * <p> Add the input panel to the window</p>
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	private void add_input_panel() {
-        this.InputPanel = new JPanel();
-        this.InputTextFile = new JTextField(100); 
-        this.InputTextFile.addActionListener(this);
-        this.BottonEnter = new JButton("Enter");
-        this.BottonEnter.addActionListener(this);
-        this.InputPanel.add(InputTextFile);
-        this.InputPanel.add(BottonEnter);
-        this.getContentPane().add(BorderLayout.SOUTH,InputPanel);
+        this.inputPanel = new JPanel();
+        this.inputTextFile = new JTextField(75); 
+        this.inputTextFile.addActionListener(this);
+        this.inputTextFile.addKeyListener(this);
+        this.bottonEnter = new JButton("Enter");
+        this.bottonEnter.addActionListener(this);
+        this.inputPanel.add(inputTextFile,BorderLayout.EAST);
+        this.inputPanel.add(bottonEnter,BorderLayout.EAST);
+        this.getContentPane().add(BorderLayout.SOUTH,inputPanel);
 	}
 	
 	/**
 	 * <h1> Window.add_output_panel() </h1>
 	 * <p> Add the output panel to the window</p>
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	private void add_output_panel() {
-		this.Output = new JTextArea(100, 100);
-		this.Output.setEditable(false);
-		this.ScrollPane=new JScrollPane(this.Output);
-		this.getContentPane().add(this.ScrollPane);
+		this.outputArea = new JTextArea(25, 30);
+		this.outputArea.setEditable(false);
+		this.outputArea.addKeyListener(this);
+		this.scrollPane=new JScrollPane(this.outputArea);
+		this.getContentPane().add(this.scrollPane);
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,12 +111,15 @@ public abstract class Window extends JFrame implements ActionListener{
 	 * <h1> Window.print() </h1>
 	 * <p> Print a string into the terminal</p>
 	 * @param output: String
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void print(String output)  {
 		try {
-			this.Output.append(output);
+			if (this.outputArea.getLineCount() > 512) {
+				this.outputArea.setText(this.outputArea.getText(1, this.outputArea.getLineCount()));
+			}
+			this.outputArea.append(output);
 			System.out.append(output);
 		} catch(Exception e){
 			e.getStackTrace();
@@ -134,16 +130,11 @@ public abstract class Window extends JFrame implements ActionListener{
 	 * <h1> Window.print() </h1>
 	 * <p> Print a string into the terminal and add an end of line</p>
 	 * @param output : String
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void println(String output)  {
-		try {
-			this.Output.append(output +'\n');
-			System.out.append(output+ '\n');
-		} catch (Exception e) {
-			e.getStackTrace();
-		}
+		this.print(output +'\n');
 	}
 	
 	/**
@@ -151,47 +142,49 @@ public abstract class Window extends JFrame implements ActionListener{
 	 * <p> Print an array of strings into the terminal <br/></p>
 	 * <p> and add an end of line in each one </p>
 	 * @param output : String[]
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void printAll(String[] output)  {
+		StringBuffer str = new StringBuffer();
 		for(String line:output) {
-			println(line);
+			str.append(line);
 		}
+		println(str.toString());
 	}
 	
 	/**
 	 * <h1> Window.clear() </h1>
 	 * <p> Clear the terminal output</p>
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void clear() {
-		this.Output.setText("");
+		this.outputArea.setText(null);
 		System.out.flush();
+		System.gc();
 	}
-	
-	
 	
 	/**
 	 * <h1> Window.read() </h1>
 	 * <p> Change the font, type and size of the window </p>
 	 * @return The input text box : String
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public String read() {
-		return this.InputTextFile.getText();
+		return this.inputTextFile.getText();
 	}
 	
 	/**
 	 * <h1> Window.actionPerformed() </h1>
 	 * <p> Loads all the actions events </p>
 	 * @param e : ActionEvent
-	 * @author David
+	 * @author D4vsus
 	 */
+	
 	public void actionPerformed(ActionEvent e) {
-	        if (e.getSource()==BottonEnter || e.getSource()==InputTextFile) {
+	        if (e.getSource()==bottonEnter || e.getSource()==inputTextFile) {
 	           try {
 	        	   
 				println(read());
@@ -201,29 +194,122 @@ public abstract class Window extends JFrame implements ActionListener{
 				 e1.printStackTrace();
 	           }
 	           
-	           this.InputTextFile.setText("");
+	           this.inputTextFile.setText(null);
+	        }
+	        if(e.getSource() == this) {
+	        	
 	        }
 	}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Style///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	/**
+	 * <h1> Window.setInputText() </h1>
+	 * <p> Sets a text on the input text bar </p>
+	 * @author D4vsus 
+	 */
+	
+	public void setInputText(String text) {
+		this.inputTextFile.setText(text);
+	}
 	
 	/**
 	 * <h1> Window.enterAcction() </h1>
 	 * <p> Run all commands when pressing enter </p>
-	 * @author David 
+	 * @author D4vsus 
 	 */
+	
 	public abstract void enterAcction();
 	
+	/**
+	 * <h1> Window.keyTyped() </h1>
+	 * <p> Nothing for know </p>
+	 * @author D4vsus
+	 * @Override
+	 */
+	
+	public void keyTyped(KeyEvent e) {
+
+	}
+	
+	/**
+	 * <h1> Window.keyReleased() </h1>
+	 * <p> Nothing for know </p>
+	 * @author D4vsus
+	 * @Override
+	 */
+	
+	public void keyReleased(KeyEvent e) {
+	}
+	
+	/**
+	 * <h1> Window.keyPressed() </h1>
+	 * <p> Manage key pressing </p>
+	 * @author D4vsus
+	 * @param KeyEvent : pressed
+	 * @Override
+	 */
+	
+	public void keyPressed(KeyEvent e) {
+	    switch( e.getKeyCode() ) { 
+        case KeyEvent.VK_UP:
+        	this.setkeyUp();
+            break;
+        case KeyEvent.VK_DOWN:
+        	this.setkeyDown();
+            break;
+        case KeyEvent.VK_LEFT:
+            // handle left
+            break;
+        case KeyEvent.VK_RIGHT :
+            // handle right
+            break;
+        case KeyEvent.VK_Z + ActionEvent.CTRL_MASK :
+        	break;
+	    }
+		if((e.getKeyCode() == KeyEvent.VK_Z && ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0))) {
+			this.setControlZ();
+		}
+	}
+	
+	/**
+	 * <h1> Window.keyDownMethod() </h1>
+	 * <p> Sets an action when pressing the arrow down </p>
+	 * @author D4vsus
+	 * @Override
+	 */
+	
+	public abstract void setkeyDown();
+	
+	/**
+	 * <h1> Window.setControlZ() </h1>
+	 * <p> Sets an action when pressing the ctrl + z </p>
+	 * @author D4vsus
+	 * @Override
+	 */
+	
+	public abstract void setControlZ();
+	
+	/**
+	 * <h1> Window.setkeyUp() </h1>
+	 * <p> Sets an action when pressing the arrow up </p>
+	 * @author D4vsus
+	 * @Override
+	 */
+	
+	public abstract void setkeyUp();
+	
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Style///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * <h1> Window.setFontOfTheWindow() </h1>
 	 * <p> Change the font of the window </p>
 	 * @param font : String
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void setFontOfTheWindow(String font) {
-		this.Output.setFont(new Font(font, Font.PLAIN,this.Output.getFont().getSize()));
-		this.InputTextFile.setFont(new Font(font, Font.PLAIN,this.Output.getFont().getSize()));
+		this.outputArea.setFont(new Font(font, Font.PLAIN,this.outputArea.getFont().getSize()));
+		this.inputTextFile.setFont(new Font(font, Font.PLAIN,this.outputArea.getFont().getSize()));
 	}
 	
 	/**
@@ -231,16 +317,13 @@ public abstract class Window extends JFrame implements ActionListener{
 	 * <p> Change the font and size of the window </p>
 	 * @param font : String
 	 * @param size : integer
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void setFontOfTheWindow(String font,int size) {
-		this.Output.setFont(new Font(font, Font.PLAIN,size));
-		this.InputTextFile.setFont(new Font(font, Font.PLAIN,size));
-
+		this.outputArea.setFont(new Font(font, Font.PLAIN,size));
+		this.inputTextFile.setFont(new Font(font, Font.PLAIN,size));
 	}
-	
-	
 	
 	/**
 	 * <h1> Window.setFontOfTheWindow() </h1>
@@ -248,27 +331,38 @@ public abstract class Window extends JFrame implements ActionListener{
 	 * @param font : String
 	 * @param type : integer
 	 * @param size : integer
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void setFontOfTheWindow(String font,int type,int size) {
-		this.Output.setFont(new Font(font, type,size));
-		this.InputTextFile.setFont(new Font(font, type,size));
+		this.outputArea.setFont(new Font(font, type,size));
+		this.inputTextFile.setFont(new Font(font, type,size));
+	}
+	
+	/**
+	 * <h1> Window.getFontOfTheWindow() </h1>
+	 * <p> Get the font of the window </p>
+	 * @return String : the font of the window
+	 * @author D4vsus 
+	 */
+	
+	public String getFontOfTheWindow() {
+		return this.outputArea.getFont().toString();
 	}
 	
 	/**
 	 * <h1> Window.setColorOfFont() </h1>
 	 * <p> Change the color of the window </p>
 	 * @param RGB : integer(hexadecimal)
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void setColorOfFont(int RGB) {
-		this.Output.setForeground(new Color(RGB));
-		this.InputTextFile.setForeground(new Color(RGB));
-		this.InputTextFile.setCaretColor(new Color(RGB));
-		this.BottonEnter.setForeground(new Color(RGB));
-		this.MenuBar.setForeground(new Color(RGB));
+		this.outputArea.setForeground(new Color(RGB));
+		this.inputTextFile.setForeground(new Color(RGB));
+		this.inputTextFile.setCaretColor(new Color(RGB));
+		this.bottonEnter.setForeground(new Color(RGB));
+		//this.MenuBar.setForeground(new Color(RGB));
 	}
 	
 	/**
@@ -277,13 +371,13 @@ public abstract class Window extends JFrame implements ActionListener{
 	 * @param RGBPanel : integer(hexadecimal)
 	 * @param RGBInputTextFile : integer(hexadecimal)
 	 * @param RGBBottonEnter : integer(hexadecimal)
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void setColorOfInput(int RGBPanel,int RGBInputTextFile,int RGBBottonEnter) {
-		this.InputPanel.setBackground(new Color(RGBPanel));
-		this.InputTextFile.setBackground(new Color(RGBInputTextFile+0x002710));
-		this.BottonEnter.setBackground(new Color(RGBInputTextFile+0x002710));
+		this.inputPanel.setBackground(new Color(RGBPanel));
+		this.inputTextFile.setBackground(new Color(RGBInputTextFile));
+		this.bottonEnter.setBackground(new Color(RGBInputTextFile));
 	}
 	
 	/**
@@ -291,23 +385,11 @@ public abstract class Window extends JFrame implements ActionListener{
 	 * <p> Change the color of the Output Panel </p>
 	 * @param RGBOutput : integer(hexadecimal)
 	 * @param RGBScrollPane : integer(hexadecimal)
-	 * @author David
+	 * @author D4vsus
 	 */
 	
 	public void setColorOfOutput(int RGBOutput,int RGBScrollPane) {
-		this.Output.setBackground(new Color(RGBOutput));
-		this.ScrollPane.setBackground(new Color(RGBScrollPane));
+		this.outputArea.setBackground(new Color(RGBOutput));
+		this.scrollPane.setBackground(new Color(RGBScrollPane));
 	}
-	
-	/**
-	 * <h1> Window.setColorOfMenu() </h1>
-	 * <p> Change the color of the Menu Panel </p>
-	 * @param RGBMenu : integer(hexadecimal)
-	 * @author David
-	 */
-	
-	public void setColorOfMenu(int RGBMenu,int RGBBorder) {
-		this.MenuBar.setBackground(new Color(RGBMenu));
-	}
-
 }

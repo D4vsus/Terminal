@@ -128,7 +128,7 @@ public abstract class CommandManager extends TerminalManager{
 				if (file.getName().contains(keyWord[1])) {
 					strBuffer.append(String.format("%s  %s\n",file.getName(),file.getPath()));
 				}
-				if (file.isDirectory()) {
+				if (file.isDirectory() && !Thread.currentThread().isInterrupted()) {
 					strBuffer.append(CommandManager.find(keyWord[0],keyWord[1],file.getPath()));
 				}	
 			}
@@ -152,6 +152,7 @@ public abstract class CommandManager extends TerminalManager{
 		StringBuffer strBuffer = new StringBuffer();
 		strBuffer.append(CommandManager.find(keyWord));
 		TerminalManager.window.println(strBuffer.toString());
+		TerminalManager.window.println("Found :" + strBuffer.toString().split("\n").length + " files.");
 	}
 	
 	/**

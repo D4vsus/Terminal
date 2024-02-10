@@ -23,6 +23,7 @@ public abstract class TerminalManager {
 	private byte posStringBuffer;
 	protected static List<String> commandLine;
 	protected static String virtualPath;
+	protected static Thread commandThread;
 	
 	//Methods
 	
@@ -40,7 +41,19 @@ public abstract class TerminalManager {
 
 			@Override
 			public void setControlZ() {
-				ProcessManager.exitProgram();
+				if (ProcessManager.isAliveProgram()) {
+					ProcessManager.exitProgram();
+				}
+				else {
+					try {
+						synchronized (TerminalManager.commandThread){
+							TerminalManager.commandThread.interrupt();
+							TerminalManager.commandThread.join();
+						}
+					} catch (Exception e) {
+
+					}
+				}
 			}
 
 			@Override
@@ -158,7 +171,9 @@ public abstract class TerminalManager {
 
 	private void commandAcction() {
 			TerminalManager.commandLine = Arrays.asList(TerminalManager.window.read().split(" "));
-			TerminalManager.runCommand(commandLine.get(0).toLowerCase()); 
+			       TerminalManager.commandThread = new Thread(() ->TerminalManager.runCommand(commandLine.get(0).toLowerCase()));
+			       TerminalManager.commandThread.start();
+				   new Thread(() ->TerminalManager.window.loading(TerminalManager.commandThread)).start();
 			this.posStringBuffer = -1;
 	}
 	

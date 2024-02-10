@@ -39,9 +39,6 @@ public abstract class Window extends JFrame implements ActionListener,KeyListene
 	 * <h1> Window.Window() </h1>
 	 * <p> Initialize the window, here variables and the objects</p>
 	 * @param title : String
-	 * @param wide : integer
-	 * @param height : integer
-	 * @param terminal : Terminal
 	 * @author D4vsus
 	 */
 	
@@ -163,6 +160,53 @@ public abstract class Window extends JFrame implements ActionListener,KeyListene
 		this.outputArea.setText(null);
 		System.out.flush();
 		System.gc();
+	}
+
+	public void loading(Thread thread) {
+		String frame[] = new String[3];
+			frame[0] = new String(
+							  "          ________     A___ \n"
+							+ "	      \\   |   Z (|)\\__A\n"
+							+ "	   ____\\  \\___/   ____/\n"
+							+ "	   \\_____________/");
+			frame[1]  = new String(
+							  "                        A___\n"
+							+ "	    _______    Z (O)\\_A\n"
+							+ "           ____\\   \\__/   ____/\n"
+							+ "	   \\_____________/");
+			frame[2]  = new String(
+							  "                        A___\n"
+							+ "	               Z (-)\\_A \n"
+							+ "	   ___________/   ____/  \n"
+							+ "	   \\___\\___\\_____/");
+		try {
+			this.inputTextFile.setEditable(false);
+			this.outputArea.append(frame[0]);
+			this.outputArea.select(this.outputArea.getText().length()-frame[0].length(), this.outputArea.getText().length());
+			while (thread.isAlive()) {
+				this.outputArea.append(frame[1]);
+				this.outputArea.replaceSelection(null);
+				this.outputArea.select(this.outputArea.getText().length()-frame[1].length(), this.outputArea.getText().length());
+				Thread.sleep(200l);
+				this.outputArea.append(frame[2]);
+				this.outputArea.replaceSelection(null);
+				this.outputArea.select(this.outputArea.getText().length()-frame[2].length(), this.outputArea.getText().length());
+				Thread.sleep(200l);
+				this.outputArea.append(frame[1]);
+				this.outputArea.replaceSelection(null);
+				this.outputArea.select(this.outputArea.getText().length()-frame[1].length(), this.outputArea.getText().length());
+				Thread.sleep(200l);
+				this.outputArea.append(frame[0]);
+				this.outputArea.replaceSelection(null);
+				this.outputArea.select(this.outputArea.getText().length()-frame[0].length(), this.outputArea.getText().length());
+				Thread.sleep(300l);
+			}
+		} catch(Exception e) {
+			e.fillInStackTrace();
+			this.inputTextFile.setEditable(true);
+		}
+		this.inputTextFile.setEditable(true);
+		this.outputArea.replaceSelection(null);
 	}
 	
 	/**
